@@ -105,7 +105,7 @@ kmer
 AAAAAAAAAAAAAAAA  
 AATTTTTTTAAAGGGCCCCC
 
-*Note the k-mer header of this file.*
+*Note the kmer header of this file.*
 
 Using simple mode with a curated dataset:  
 
