@@ -36,6 +36,10 @@ While whole genome sequencing (WGS) is the gold standard for surveying such path
 ```conda install -c bioconda samtools```
 
 The CURED pipeline was tested with Linux and macOS.
+---
+**Quick Start**
+
+```python3 CURED_Main.py --case_control sample.csv --genomes example_data/```  
 
 ---
 ## **CURED Toolbox**
@@ -56,13 +60,13 @@ GCA_XXXXXXX.X.fna,case
 By default, the program expects the extension .fna. Use the --extension flag to indicate a different extension.
 
 Running CURED_Main.py:  
-``` python3 CURED_Main.py --case_control case_control_input.csv --genomes_folder /path/to/genomes/```
+``` python3 CURED_Main.py --case_control_file case_control_input.csv --genomes_folder /path/to/genomes/```
 
  Running CURED_Main.py with a curated dataset but with altered sensitivity and specificity thresholds:  
- ``` python3 CURED_Main.py --sensitivity 95 --specificity 95 --case_control case_control_input.csv --genomes_folder /path/to/genomes/```
+ ``` python3 CURED_Main.py --sensitivity 95 --specificity 95 --case_control_file case_control_input.csv --genomes_folder /path/to/genomes/```
 
  Running CURED_Main.py with a curated dataset but with k-mer size of 31 (the default is 20-mer):  
- ``` python3 CURED_Main.py --kmer_length 31 --case_control case_control_input.csv --genomes_folder /path/to/genomes/```  
+ ``` python3 CURED_Main.py --kmer_length 31 --case_control_file case_control_input.csv --genomes_folder /path/to/genomes/```  
 
 
 ##### (2) Selecting a species and designating a specific sequence type as the case group.
