@@ -216,7 +216,6 @@ def add_to_pcr_dict(pcr_dict, kmer, start, end, include_upstream, include_downst
 
 # Function to run samtools faidx
 def samtools_extract(filepath, contig, start, end, rc=None):
-    print(rc)
     try:
         sequence_list = []
         if rc == None:
@@ -347,6 +346,8 @@ def write_PCR_report(pcr_dict, unique_kmer, filepath, unique_case_regions):
     contig_name = pcr_dict[unique_kmer][-1]
     if start_coordinate < 1:
         start_coordinate = 1
+    if len(unique_kmer) > 255:
+        unique_kmer = unique_kmer[:245]
     extract_pcr_cmd = f'samtools faidx {filepath} "{contig_name}":{start_coordinate}-{end_coordinate} > {unique_kmer}_pcr.fa'
     run_extract_pcr = subprocess.run(extract_pcr_cmd, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     with open(f'{unique_kmer}_pcr.fa', 'r') as pcr_file:
