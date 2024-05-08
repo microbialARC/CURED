@@ -29,8 +29,7 @@ PARSER.add_argument('--pcr_product_downstream',
 '-DOWN', type=int, help='Number of bases to include downstream of identified k-mer in outputted PCR product.')
 PARSER.add_argument('--compare_coordinates',action='store_true',help='Mode to compare RE by position to determine uniqueness. Default is to determine uniqueness based on presence/absence.')
 PARSER.add_argument('--enzymes',type=str,help='Provide a file of restriction enzymes to be used. Default is all enzymes supplied by NE Biolabs.')
-PARSER.add_argument('-v', '--version', action='version', version='%(prog)s 1.0', help="Show program's version number and exit.")
-PARSER.add_argument('--help', action='help', default=argparse.SUPPRESS,help='Show this help message and exit.')
+PARSER.add_argument('-help', action='help', help='Show this help message and exit.')
 PARSER.add_argument('kmers',
 type=str, help='List of kmers to be searched.')
 PARSER.add_argument('genomes_folder',
