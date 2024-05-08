@@ -43,8 +43,7 @@ PARSER.add_argument('--case_genomes', action='store_true',help='Option if you ha
 PARSER.add_argument('--use_datasets', action='store_true',help='Option to provide CURED with a case and control file of ncbi accessions and downloaded them. Use with --case_control_file')
 PARSER.add_argument('--use_simple', action='store_true',help='Option to run unitig-caller simple mode. This is useful for when you already have a list of k-mers that you want to query against a set of genomes. ')
 PARSER.add_argument('--kmer_list', type=str, help='List of k-mers to be used as query in running unitig-caller simple mode')
-PARSER.add_argument('-v', '--version', action='version',version='%(prog)s 1.0', help="Show program's version number and exit.")
-PARSER.add_argument('-help', action='help', default=argparse.SUPPRESS, help='Show this help message and exit.')
+PARSER.add_argument('-help', action='help', help='Show this help message and exit.')
 ARGS = PARSER.parse_args()
 
 if bool(vars(ARGS)["sequence_type"]) and not bool(vars(ARGS)["species"]):
