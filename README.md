@@ -19,21 +19,18 @@ While whole genome sequencing (WGS) is the gold standard for surveying such path
 - bwa (tested with version 0.7.17)
 - biopython (tested with version 1.82)
 
-#### Installing Dependencies
+#### Installing CURED 
 
-```conda create --name cured```
+##### Installing with Bioconda  
+```conda install bioconda::cured```
 
-```conda activate cured```
-
-```conda install -c conda-forge -c bioconda -c defaults mlst==2.23.0```
-
-```conda install -c conda-forge ncbi-datasets-cli==15.28.0```
-
-```conda install -c bioconda unitig-caller```
-
-```conda install -c bioconda blast==2.15.0```
-
-```conda install -c bioconda samtools```
+##### Installing with GitHub
+```git clone https://github.com/microbialARC/CURED```  
+```cd CURED```  
+```conda env create -f cured.yml```  
+```conda activate cured```  
+```chmod u+x bin/*```  
+```cp bin/* "$CONDA_PREFIX"/bin/```  
 
 The CURED pipeline was tested with Linux and macOS.
 ---
