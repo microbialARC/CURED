@@ -1,0 +1,14 @@
+name: cured
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+    - blast
+    - bwa
+    - mlst
+    - ncbi-datasets-cli
+    - python = 3.10
+    - samtools
+    - unitig-caller
+    - biopython = 1.82
