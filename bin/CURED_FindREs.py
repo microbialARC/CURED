@@ -10,6 +10,7 @@ from Bio.Seq import Seq
 from collections import Counter
 import argparse
 import logging
+import hashlib
 
 PARSER = argparse.ArgumentParser(prog='CURED_FindREs.py', description='This script is a part of the CURED pipeline. This script is used to find restriction enzyme sites in the identified k-mers.')
 
@@ -348,8 +349,19 @@ def write_PCR_report(pcr_dict, unique_kmer, filepath, unique_case_regions):
     contig_name = pcr_dict[unique_kmer][-1]
     if start_coordinate < 1:
         start_coordinate = 1
-    if len(unique_kmer) > 255:
-        unique_kmer = unique_kmer[:245]
+    unique_kmer_hash = hashlib.md5(unique_kmer.encode()).hexdigest()
+    extract_pcr_cmd = f'samtools faidx {filepath} "{contig_name}":{start_coordinate}-{end_coordinate} > {unique_kmer_hash}_pcr.fa'
+    run_extract_pcr = subprocess.run(extract_pcr_cmd, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+    with open(f'{unique_kmer_hash}_pcr.fa', 'r') as pcr_file:
+        for line in pcr_file:
+            line = line.rstrip()
+            if line.startswith('>'):
+                header = f'>{unique_kmer}'
+                unique_case_regions.write(header + '\n')
+            else:
+                unique_case_regions.write(line + '\n')
+    os.remove(f'{unique_kmer_hash}_pcr.fa')
+
     extract_pcr_cmd = f'samtools faidx {filepath} "{contig_name}":{start_coordinate}-{end_coordinate} > {unique_kmer}_pcr.fa'
     run_extract_pcr = subprocess.run(extract_pcr_cmd, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     with open(f'{unique_kmer}_pcr.fa', 'r') as pcr_file:
