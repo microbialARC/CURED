@@ -362,18 +362,6 @@ def write_PCR_report(pcr_dict, unique_kmer, filepath, unique_case_regions):
                 unique_case_regions.write(line + '\n')
     os.remove(f'{unique_kmer_hash}_pcr.fa')
 
-    extract_pcr_cmd = f'samtools faidx {filepath} "{contig_name}":{start_coordinate}-{end_coordinate} > {unique_kmer}_pcr.fa'
-    run_extract_pcr = subprocess.run(extract_pcr_cmd, shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-    with open(f'{unique_kmer}_pcr.fa', 'r') as pcr_file:
-        for line in pcr_file:
-            line = line.rstrip()
-            if line.startswith('>'):
-                header = f'>{unique_kmer}'
-                unique_case_regions.write(header + '\n')
-            else:
-                unique_case_regions.write(line + '\n')
-    os.remove(f'{unique_kmer}_pcr.fa')
-
 # Get paths of controls to be used during the for loop used for finding unique restriction sites.
 CONTROLS = [genome for genome, status in genome_dict.items() if status == 'CONTROL']
 
