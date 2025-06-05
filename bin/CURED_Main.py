@@ -369,14 +369,12 @@ def calculate_local_thresholds(num_cases_in_dataset, global_sensitivity_threshol
 def generate_unitig_caller_cmd(unitig_counter, thr, fop, master_files_lst, kmer_length):
     if unitig_counter == 0:
         if ARGS.use_simple:
-            print('First iteration - Running simple mode')
             unitig_caller_cmd = 'unitig-caller --simple --refs refs.txt --threads {} --unitigs {} --out {}'.format(thr, kmer_list, fop)
             master_files_lst.append('NA')
         else:
             unitig_caller_cmd = 'unitig-caller --call --refs refs.txt --threads {} --kmer {} --out {}'.format(thr,kmer_length,fop)
             master_files_lst.append('NA')
     else:
-        print('Running simple mode')
         master_file = master_files_lst[unitig_counter]
         unitig_caller_cmd = 'unitig-caller --simple --refs refs.txt --threads {} --unitigs {} --out {}'.format(thr,master_file,fop)
     logging.info(unitig_caller_cmd)
@@ -483,7 +481,6 @@ if ARGS.use_datasets:
     download_genomes_accession(accessions_to_download)
     write_case_control_file(TIMESTR, genome_dict)
 ################################################################################
-print(genome_dict)
 num_controls, num_cases = create_counter_dictionary(genome_dict)
 
 if ARGS.number_of_cases:
