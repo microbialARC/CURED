@@ -36,7 +36,7 @@ The CURED pipeline was tested with Linux and macOS.
 ---
 **Quick Start**
 
-```python3 CURED_Main.py --case_control sample.csv --genomes example_data/```  
+```CURED_Main.py --case_control sample.csv --genomes example_data/```  
 
 ---
 ## **CURED Toolbox**
@@ -57,25 +57,25 @@ GCA_XXXXXXX.X.fna,case
 By default, the program expects the extension .fna. Use the --extension flag to indicate a different extension.
 
 Running CURED_Main.py:  
-``` python3 CURED_Main.py --case_control_file case_control_input.csv --genomes_folder /path/to/genomes/```
+```CURED_Main.py --case_control_file case_control_input.csv --genomes_folder /path/to/genomes/```
 
  Running CURED_Main.py with a curated dataset but with altered sensitivity and specificity thresholds:  
- ``` python3 CURED_Main.py --sensitivity 95 --specificity 95 --case_control_file case_control_input.csv --genomes_folder /path/to/genomes/```
+ ```CURED_Main.py --sensitivity 95 --specificity 95 --case_control_file case_control_input.csv --genomes_folder /path/to/genomes/```
 
  Running CURED_Main.py with a curated dataset but with k-mer size of 31 (the default is 20-mer):  
- ``` python3 CURED_Main.py --kmer_length 31 --case_control_file case_control_input.csv --genomes_folder /path/to/genomes/```  
+ ```CURED_Main.py --kmer_length 31 --case_control_file case_control_input.csv --genomes_folder /path/to/genomes/```  
 
 
 ##### (2) Selecting a species and designating a specific sequence type as the case group.
- ``` python3 CURED_Main.py --species Staphylococcus aureus --sequence_type 300```
+ ```CURED_Main.py --species Staphylococcus aureus --sequence_type 300```
 
  By default, this will download all *Staphylococcus aureus* assembled genomes available in NCBI. Use the --database option to choose to download genomes from just RefSeq or GenBank.
 
- ```python3 CURED_Main.py --species Staphylococcus aureus --sequence_type 300 --database RefSeq```
+ ```CURED_Main.py --species Staphylococcus aureus --sequence_type 300 --database RefSeq```
 
  You can also see how many genomes are to be downloaded by ncbi-datasets before running the above command by using the ```--summary``` option.
 
- ```python3 CURED_Main.py --species Staphylococcus aureus --sequence_type 300 --database RefSeq --summary```  
+ ```CURED_Main.py --species Staphylococcus aureus --sequence_type 300 --database RefSeq --summary```  
 
  #### (3) Providing a list of accession numbers to be used as the case group.
 Formatting of the file:  
@@ -83,7 +83,7 @@ GCA_000013125
 GCA_000439755  
 GCA_000439775  
 
- ```python3 CURED_Main.py --species Pseudomonas putida --case_accession_list case_accessions.txt --database GenBank```  
+ ```CURED_Main.py --species Pseudomonas putida --case_accession_list case_accessions.txt --database GenBank```  
 
  #### (4) Providing a list of accession numbers to be used as cases and controls.
  Formatting of the file:  
@@ -92,11 +92,11 @@ GCA_000439775
  GCA_000439775,control  
  GCA_000478425,control  
 
- ```python3 CURED_Main.py --case_control_file case_control_accessions.txt --use-datasets```  
+ ```CURED_Main.py --case_control_file case_control_accessions.txt --use-datasets```  
 
  #### (5) Providing a folder of local genomes to be used as cases and download a species to be used as controls.
 
- ```python3 CURED_Main.py --case_genomes --genomes_folder genomes/ --species Anaplasma phagocytophilum --database GenBank```  
+ ```CURED_Main.py --case_genomes --genomes_folder genomes/ --species Anaplasma phagocytophilum --database GenBank```  
 
 #### (6) Providing a list of known k-mers that can be queried against a set of genomes.  
 If you have a set of k-mers that you are interested in, you can leverage the ```--use_simple``` option to search a set of genomes for the presence of these specific k-mers. This option is different than the previous options in that it skips the first iteration of unitig-caller (which is run in call mode) and goes directly into running unitig-caller in simple mode. This option can be used with any of the previous entry point options.
@@ -110,11 +110,11 @@ AATTTTTTTAAAGGGCCCCC
 
 Using simple mode with a curated dataset:  
 
-```python3 CURED_Main.py --use_simple --kmer_list kmers_to_query.txt --case_control_file case_control.txt --genomes_folder /path/to/genomes/ --extension fa```    
+```CURED_Main.py --use_simple --kmer_list kmers_to_query.txt --case_control_file case_control.txt --genomes_folder /path/to/genomes/ --extension fa```    
 
 Using simple mode with a species and ST of interest:   
 
-```python3 CURED_Main.py --use_simple --kmer_list kmers_to_query.txt --species Staphylococcus aureus --sequence_type 105 --database RefSeq```
+```CURED_Main.py --use_simple --kmer_list kmers_to_query.txt --species Staphylococcus aureus --sequence_type 105 --database RefSeq```
 
 ```
 usage: CURED_Main.py [-h] [--number_of_cases NUMBER_OF_CASES] [--number_of_controls NUMBER_OF_CONTROLS]
@@ -181,21 +181,21 @@ The *UniqueKmers.txt* file from running CURED_Main.py can be used directly as in
 
 #### Examples of running CURED_FindREs.py:
 
-```python3 CURED_FindREs.py --case_control_file case_control_input.csv UniqueKmers.txt /path/to/genomes/```
+```CURED_FindREs.py --case_control_file case_control_input.csv UniqueKmers.txt /path/to/genomes/```
 
 Change the specificity of each restriction enzyme site  
-```python3 CURED_FindREs.py --case_control_file case_control_input.csv --specificity 50 UniqueKmers.txt /path/to/genomes/```
+```CURED_FindREs.py --case_control_file case_control_input.csv --specificity 50 UniqueKmers.txt /path/to/genomes/```
 
 To find the support for each restriction enzyme site found in the k-mer, set --specificity 0  
-```python3 CURED_FindREs.py --case_control_file case_control_input.csv --specificity 0 UniqueKmers.txt /path/to/genomes/```
+```CURED_FindREs.py --case_control_file case_control_input.csv --specificity 0 UniqueKmers.txt /path/to/genomes/```
 
 The default mode for identifying unique restriction enzyme sites is based upon presence/absence. For instance, the position in which the restriction enzyme is found in within the control sequence is not taken into account. If the same restriction enzyme is found in the control as in the case, it's not considered unique to the case. However, the mode can be changed using the ```--compare_coordinates``` flag. When used, this flag will consider the position of the restriction enzyme site in the control. If the same restriction enzyme in the case is found in the flanking region of the control, then it is considered to be unique to the case.  
 
-```python3 CURED_FindREs.py --compare_coordinates UniqueKmers.txt /path/to/genomes/```
+```CURED_FindREs.py --compare_coordinates UniqueKmers.txt /path/to/genomes/```
 
 Use ```--compare_coordinates``` option with ```--specificity 0``` to find the full support for each identified restriction enzyme site using comparison mode.
 
-```python3 CURED_FindREs.py --compare_coordinates --specificity 0 UniqueKmers.txt /path/to/genomes/```
+```CURED_FindREs.py --compare_coordinates --specificity 0 UniqueKmers.txt /path/to/genomes/```
 
 
 ```
