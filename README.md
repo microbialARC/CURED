@@ -33,7 +33,11 @@ While whole genome sequencing (WGS) is the gold standard for surveying such path
 ```cp bin/* "$CONDA_PREFIX"/bin/```
 
 ##### Installing with Docker
-Load the Docker image:  
+
+Pull the Docker image:   
+```docker pull microbialarc/cured-1.0.5```  
+
+Load the Docker image (optional, only if loading from local file):  
 ```docker load -i cured-1.0.5.tar.gz```  
 
 Start an interactive container:  
