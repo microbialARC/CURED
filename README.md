@@ -30,7 +30,23 @@ While whole genome sequencing (WGS) is the gold standard for surveying such path
 ```conda env create -f cured.yml```  
 ```conda activate cured```  
 ```chmod u+x bin/*```  
-```cp bin/* "$CONDA_PREFIX"/bin/```  
+```cp bin/* "$CONDA_PREFIX"/bin/```
+
+##### Installing with Docker
+Load the Docker image:  
+```docker load -i cured-1.0.5.tar.gz```  
+
+Start an interactive container:  
+```docker run -it cured:1.0.5```    
+
+Test CURED installed properly:  
+```CURED_Main.py -h```  
+
+Mount a local directory (optional):   
+```docker run -v /path/to/local/dir:/path/to/dir/in/container -it cured:1.0.5```
+
+- Replace /path/to/local/dir with your host folder
+- Replace /path/in/container with the folder path inside the container where CURED can access it
 
 The CURED pipeline was tested with Linux and macOS.
 ---
