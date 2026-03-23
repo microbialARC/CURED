@@ -2,6 +2,7 @@
 
 import sys
 from collections import Counter
+from collections import defaultdict
 import time
 import os
 import subprocess
@@ -43,6 +44,7 @@ PARSER.add_argument('--case_genomes', action='store_true',help='Option if you ha
 PARSER.add_argument('--use_datasets', action='store_true',help='Option to provide CURED with a case and control file of ncbi accessions and downloaded them. Use with --case_control_file')
 PARSER.add_argument('--use_simple', action='store_true',help='Option to run unitig-caller simple mode. This is useful for when you already have a list of k-mers that you want to query against a set of genomes. ')
 PARSER.add_argument('--kmer_list', type=str, help='List of k-mers to be used as query in running unitig-caller simple mode')
+PARSER.add_argument('--tracking_specificity', type = int, help = 'Option to set specificty threshold for kmers used to track genome relatedness. Default = 95')
 PARSER.add_argument('-help', action='help', help='Show this help message and exit.')
 ARGS = PARSER.parse_args()
 
@@ -88,6 +90,10 @@ if ARGS.kmer_list:
     kmer_list = ARGS.kmer_list
 if ARGS.sequence_type:
     sequence_type = str(ARGS.sequence_type)
+if ARGS.tracking_specificity:
+    tracking_specificity = (100-ARGS.tracking_specificity)/100
+else:
+    tracking_specificity = 0.1
 
 TIMESTR = time.strftime("%Y%m%d_%H%M%S")
 LOG_FILE = 'CURED_'+ TIMESTR
@@ -190,7 +196,7 @@ def download_genomes_taxon(genus_species_command,db):
 
 def download_genomes_accession(accessions_to_download):
     counter = 0
-    grouping_factor = 500
+    grouping_factor = 350
     list_of_accessions = [accessions_to_download[i:i+grouping_factor] for i in range(0, len(accessions_to_download), grouping_factor)]
     for lst in list_of_accessions:
 
@@ -271,8 +277,8 @@ def generate_smaller_datasets(genome_dict, cases_count, controls_count):
     while case_genomes or control_genomes:
         selected_cases = case_genomes[:cases_count]
         selected_controls = control_genomes[:controls_count]
-
         selected_genomes = selected_cases + selected_controls
+
         genome_lists.append(selected_genomes)
 
         case_genomes = case_genomes[cases_count:]
@@ -511,6 +517,10 @@ removed_kmers = set()
 unitig_counter = 0
 master_files_lst = []
 simple_mode_kmers = []
+similarity_tracker = defaultdict(int)
+previous_threshold_pass_kmers = set()
+tracked_unitigs = "tracked_unitigs.txt"
+unitig_case_counter = (num_cases-1) // cases_count
 
 # When running simple mode, if the k-mer is not found in the iteration, it needs to still get carried over to search future iterations.
 if ARGS.use_simple:
@@ -520,9 +530,18 @@ if ARGS.use_simple:
             line = line.rstrip()
             simple_mode_kmers.append(line)
 
+
 for sublist in genome_lists:
-    num_cases_in_dataset, num_controls_in_dataset = dataset_composition(sublist, genome_dict)
+    #num_cases_in_dataset, num_controls_in_dataset = dataset_composition(sublist, genome_dict)
     write_refs_file(sublist, EXT, extractedFiles_directory)
+    
+    if unitig_counter <= unitig_case_counter:
+        num_cases_in_dataset, num_controls_in_dataset = dataset_composition(sublist, genome_dict)
+        #num_cases_in_dataset = len(sublist)
+        #num_controls_in_dataset = 0
+    else:
+        num_cases_in_dataset = 0
+        num_controls_in_dataset = len(sublist)
 
     # Run unitig-caller. Unzip the output.
     TIMESTR = time.strftime("%Y%m%d_%H%M%S")
@@ -535,6 +554,8 @@ for sublist in genome_lists:
     # Calculate local sensitivity and specificity thresholds. Default range for searching list length.
     local_sensitivity, local_specificity = calculate_local_thresholds(num_cases_in_dataset, global_sensitivity_threshold, global_specificity_threshold)
 
+    tracking_threshold = num_controls_in_dataset * tracking_specificity
+
     # Parse the unitig-caller output
     try:
         for line in open(fop, 'r'):
@@ -544,6 +565,11 @@ for sublist in genome_lists:
             kmer = line_list[0]
             genome_list = line_list[2:]
             if kmer in removed_kmers:
+                continue
+            if num_cases_in_dataset == 0 and kmer in previous_threshold_pass_kmers:
+                for genome in genome_list:
+                    genome_name = genome.split(':')[0]
+                    similarity_tracker[genome_name] += 1
                 continue
 
             elif kmer in master_dictionary:
@@ -560,6 +586,8 @@ for sublist in genome_lists:
                         genome_name = genome_name
                         if genome_dict[genome_name] == 'CONTROL':
                             control_counter += 1
+                            if num_cases_in_dataset == 0: #Only start tracking similarity once all case genomes have been processed 
+                                similarity_tracker[genome_name] += 1
                         else:
                             if genome_dict[genome_name] == 'CASE':
                                 case_counter += 1
@@ -568,7 +596,10 @@ for sublist in genome_lists:
                     updated_control_count = existing_control_count + control_counter # Update the number of controls
                     if (updated_case_count < 0) or (updated_control_count > global_specificity_threshold): # Check to make sure all of the cases or controls are not 'spent'. If they are spent, remove the kmer from the master dictionary and add to removed kmers set.
                         del master_dictionary[kmer]
-                        removed_kmers.add(kmer)
+                        #if num_cases_in_dataset == 0:
+                        previous_threshold_pass_kmers.add(kmer)
+                        #else:
+                           # removed_kmers.add(kmer)
 
                     else: # If the cases/controls are not spent, update the dictionary with the new counts.
                         master_dictionary[kmer][0] = updated_case_count
@@ -577,24 +608,43 @@ for sublist in genome_lists:
 
                 else: # If the kmer exists, but doesn't pass the threshold, remove it from dictionary and add to removed kmers set.
                     del master_dictionary[kmer]
-                    removed_kmers.add(kmer)
+                    #if num_cases_in_dataset == 0:
+                    previous_threshold_pass_kmers.add(kmer)
+                    for genome in genome_list:
+                        genome_name = genome.split(":")[0]
+                        genome_name = genome_name
+                        if genome_dict[genome_name] == 'CONTROL':
+                            similarity_tracker[genome_name] += 1
 
-            elif (len(genome_list) >= local_sensitivity) and (len(genome_list) <= local_specificity): # Execute this block of code if the kmer has not been seen yet, but passes the initial threshold.
+                    #else:
+                     #   removed_kmers.add(kmer)
+
+            elif (len(genome_list) >= local_sensitivity): #and (len(genome_list) <= local_specificity): # Execute this block of code if the kmer has not been seen yet, but passes the initial threshold.
                 for genome in genome_list:
                     genome_name = genome.split(':')[0]
                     genome_name = genome_name
                     if genome_dict[genome_name] == 'CONTROL':
                         control_counter += 1
+                        if num_cases_in_dataset == 0:
+                            similarity_tracker[genome_name] += 1
                     else:
                         if genome_dict[genome_name] == 'CASE':
                             case_counter += 1
 
                 if control_counter > specificity_step2: # If controls is greater than 7900, automatically fails. Checking to make sure that the number of controls in not over the allowable limit. Needs to be done when adding a kmer to master dictionary the first time.
-                    removed_kmers.add(kmer)
+                    if control_counter <= tracking_threshold and num_cases_in_dataset >= local_sensitivity:
+                        previous_threshold_pass_kmers.add(kmer)
+
+                    else:
+                         removed_kmers.add(kmer)
                 else:
                     num_of_cases_kmer_not_found_in = num_cases_in_dataset - case_counter
                     updated_case_count = global_sensitivity_threshold - num_of_cases_kmer_not_found_in # 100 - number of cases for this kmer
                     if (updated_case_count < 0):
+                        #if num_cases_in_dataset == 0:
+                        #logging.info("Adding new kmer to tracking from too low sensitivity")
+                        #previous_threshold_pass_kmers.add(kmer)
+                        #else:
                         removed_kmers.add(kmer)
                     else: # If not spent, add to the master dictionary
                         subdict_value = [updated_case_count, control_counter, case_counter]#check this
@@ -605,22 +655,38 @@ for sublist in genome_lists:
     except:
         logging.warning("Error occurred while parsing unitig output.".format(unitig_counter))
 
-    master_file_iter = "{}/unitig_caller_master_{}_{}.txt".format(temp_dir,str(unitig_counter),TIMESTR)
+    if unitig_counter == unitig_case_counter + 1: #add 1 because unitig counter was already incremented to next step
+        master_file_iter = tracked_unitigs
+        mast_iter = open(master_file_iter, 'w')
+        mast_iter.write('kmer\n')
+        mast_iter.writelines('{}\n'.format(k) for k in master_dictionary)
+        mast_iter.writelines('{}\n'.format(k) for k in previous_threshold_pass_kmers)
+    
+    elif unitig_counter <= unitig_case_counter:
+        master_file_iter = "{}/unitig_caller_master_{}_{}.txt".format(temp_dir,str(unitig_counter),TIMESTR)
+        mast_iter = open(master_file_iter, 'w')
+        mast_iter.write('kmer\n')
+        mast_iter.writelines('{}\n'.format(k) for k in master_dictionary)
+
+    else:
+        master_file_iter = tracked_unitigs
+
     master_files_lst.append(master_file_iter)
-    mast_iter = open(master_file_iter, 'w')
-    mast_iter.write('kmer\n')
-    mast_iter.writelines('{}\n'.format(k) for k in master_dictionary)
+        
     # When running simple mode, if the k-mer is not found in the iteration, it needs to still get carried over to search future iterations.
-    if len(simple_mode_kmers) != 0:
+    if len(simple_mode_kmers) != 0 and unitig_counter <= unitig_case_counter + 1:
         for kmer in simple_mode_kmers:
             if kmer in removed_kmers:
                 continue
             elif kmer in master_dictionary:
                 continue
+            elif kmer in previous_threshold_pass_kmers:
+                continue
             else:
                 mast_iter.write(f'{kmer}\n')
     mast_iter.close()
 
+#add missing genomes (minus burn-in) to similarity tracker
 
 kmers_to_be_removed = []
 for k in master_dictionary:
@@ -629,15 +695,27 @@ for k in master_dictionary:
 
 for k in kmers_to_be_removed:
     del master_dictionary[k]
-    removed_kmers.add(k)
+    #removed_kmers.add(k)
+    previous_threshold_pass_kmers.add(k)
 
 with open('UniqueKmers.txt', 'w') as out:
     for k in master_dictionary:
         out.write(k + '\n')
 
-logging.info('Number of removed kmers: ' + str(len(removed_kmers)))
+sim_matrix_length = len(similarity_tracker)
+#get genomes not included in tracking and add them to tracking dict with 0 count
+all_controls = {genome for genome, status in genome_dict.items() if status == 'CONTROL'}
+tracked_controls = set(similarity_tracker.keys())
+missing_controls = all_controls.difference(tracked_controls)
+for genome in missing_controls:
+    similarity_tracker[genome] = 0
+
+logging.info('Number of removed kmers: ' + str((len(removed_kmers) + len(previous_threshold_pass_kmers))))
+logging.info('Number of kmers tracked for similarity: ' + str((len(previous_threshold_pass_kmers) + len(master_dictionary))))
 rem_op = open(f'{temp_dir}/removed_kmers.txt','w')
 rem_op.writelines(f"{k}\n" for k in removed_kmers)
+prev_op = open(f'{temp_dir}/tracked_removed_kmers.txt', 'w')
+prev_op.writelines(f"{k}\n" for k in previous_threshold_pass_kmers)
 mast_op = open('Unique_Kmers_Report.txt','w')
 mast_op.write('Kmer\tNumber of Controls K-mer Found in\tNumber of Cases K-mer Found In\n')
 for k,v in master_dictionary.items():
@@ -645,5 +723,11 @@ for k,v in master_dictionary.items():
     found_in_controls = v[1]
     found_in_cases = v[2]
     mast_op.write(f'{kmer}\t{found_in_controls}\t{found_in_cases}\n')
+sim_op = open('Genome_Similarity_Matrix.csv', 'w')
+logging.info('Number of genomes tracked for similarity: ' + str(sim_matrix_length))
+for k,v in sorted(similarity_tracker.items(), key=lambda item: item[1], reverse = True):
+    genome_name = k
+    kmer_count = v
+    sim_op.write(f'{genome_name},{kmer_count}\n')
 logging.info('Number of kmers in master_dict: ' + str(len(master_dictionary)))
 # os.remove('refs.txt')
