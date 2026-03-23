@@ -237,7 +237,7 @@ positional arguments:
   kmers                 List of kmers to be searched.
   genomes_folder        Path to genomes.
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   --case_control_file CASE_CONTROL_FILE
                         Csv file of cases and controls.
