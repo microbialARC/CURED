@@ -289,7 +289,7 @@ CURED_FindREs_summary.txt | Summary report detailing the k-mer, case genome used
 CURED_UniqueEnzymes_PCR_Products.tsv | If a restriction enzyme is identified as unique to the case, the PCR product for the corresponding k-mer is outputted.
 *.log | Log report
 
-If using CURED for published research, please cite:
+If using CURED for published research, please cite:<br>
 Theiller E, Rajagopol S, Higgins S, Torres DI, Napper T, Galis BE, Dash A, Qian E, Hamlette L, She Q, Tanes C, L'Etoile N, Feder A, Viana AS, Côrtes Esteves MA, Abt MC, Coffin SE, Hayes E, Potter RF, Zackular JP, Srinivasan L, Figueiredo AMS, Planet PJ, Moustafa AM.0.Empowering global disease surveillance with CURED: a tool for rapid identification of unique genomic biomarkers. mSystems0:e01063-25.https://doi.org/10.1128/msystems.01063-25
 
 Please note that we have made significant runtime improvements to the tool (especially CURED_FindREs) since its publication. As such, we highly recommend using the most recent version. However, the version as published is still accessible via the v1.0.4 release for those who wish to use it.
