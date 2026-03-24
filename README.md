@@ -192,6 +192,7 @@ options:
 Unique_Kmers_Report.txt | Report of unqiue k-mers identified within set sensitivity and specificity. Reports the number of controls and/or cases that each k-mer is found in.
 tmp*/ | Intermediate raw data files produced and used by unitig-caller
 UniqueKmers.txt | List of unique k-mers. This can be used as input for CURED_FindREs.py
+Genome_Similarity_Matrix.csv | File ranking control genomes by putative similarity to control genomes. Used as an optional input for CURED_FindREs but is not usually recommended
 *.log | Log report
 
 ### Running CURED_FindREs.py
@@ -219,12 +220,14 @@ Use ```--compare_coordinates``` option with ```--specificity 0``` to find the fu
 
 
 ```
-usage: CURED_FindREs.py [-h] [--case_control_file CASE_CONTROL_FILE]
-                        [--specificity SPECIFICITY] [--added_bases ADDED_BASES]
-                        [--min_coverage MIN_COVERAGE] [--extension EXTENSION]
+usage: CURED_FindREs.py [-h] --case_control_file CASE_CONTROL_FILE [--specificity SPECIFICITY]
+                        [--added_bases ADDED_BASES] [--min_coverage MIN_COVERAGE] [--extension EXTENSION]
                         [--pcr_product_upstream PCR_PRODUCT_UPSTREAM]
-                        [--pcr_product_downstream PCR_PRODUCT_DOWNSTREAM]
-                        [--compare_coordinates]
+                        [--pcr_product_downstream PCR_PRODUCT_DOWNSTREAM] [--compare_coordinates]
+                        [--tolerance TOLERANCE] [--output_dir OUTPUT_DIR] [--enzymes ENZYMES]
+                        [--similarity_matrix SIMILARITY_MATRIX] [--batch_size BATCH_SIZE] [--threads THREADS]
+                        [--k_size K_SIZE] [--mm2_m MM2_M] [--mm2_s MM2_S] [--mm2_A MM2_A] [--mm2_B MM2_B]
+                        [--mm2_w MM2_W]
                         kmers genomes_folder
 
 This script is a part of the CURED pipeline. This script is used to find restriction enzyme
@@ -243,19 +246,39 @@ optional arguments:
   --added_bases ADDED_BASES
                         Number of added bases on either end of the sequence. Default = 20.
   --min_coverage MIN_COVERAGE
-                        Minimum coverage threshold for sequence to be considered found in
-                        controls. Default = 90.
+                        Minimum coverage threshold (0-100). Default = 90.
   --extension EXTENSION, -x EXTENSION
                         Extension of input assemblies. Default = fna
   --pcr_product_upstream PCR_PRODUCT_UPSTREAM, -UP PCR_PRODUCT_UPSTREAM
-                        Number of bases to include upstream of identified k-mer in outputted
-                        PCR product.
+                        Upstream bases for PCR product.
   --pcr_product_downstream PCR_PRODUCT_DOWNSTREAM, -DOWN PCR_PRODUCT_DOWNSTREAM
-                        Number of bases to include downstream of identified k-mer in
-                        outputted PCR product.
+                        Downstream bases for PCR product.
   --compare_coordinates
-                        Mode to compare RE by position to determine uniqueness. Default is to
-                        determine uniqueness based on presence/absence.
+                        Compare RE by position.
+  --tolerance TOLERANCE
+                        Resolution tolerance (bp) for compare_coordinates. Default = 15.
+  --output_dir OUTPUT_DIR, -o OUTPUT_DIR
+                        Directory to save all output files.
+  --enzymes ENZYMES     
+			File of restriction enzymes. Default: All NEB.
+  --similarity_matrix SIMILARITY_MATRIX
+                        Path to similarity matrix csv.
+  --batch_size BATCH_SIZE, -b BATCH_SIZE
+                        Batch size. Default = 5000.
+  --threads THREADS, -t THREADS
+                        Threads. Default = 38.
+  --k_size K_SIZE, -k K_SIZE
+                        Minimap2 seed size. Default = 11.
+  --mm2_m MM2_M, -m MM2_M
+                        Minimap2 -m. Default=10.
+  --mm2_s MM2_S, -s MM2_S
+                        Minimap2 -s. Default=10.
+  --mm2_A MM2_A, -A MM2_A
+                        Minimap2 -A. Default=2.
+  --mm2_B MM2_B, -B MM2_B
+                        Minimap2 -B. Default=4.
+  --mm2_w MM2_W, -w MM2_W
+                        Minimap2 -w. Default=10.
 ```
 #### Output from running CURED_FindREs.py
  File | Description
@@ -265,3 +288,8 @@ CURED_FindREs_controls.txt | If a restriction enzyme site that is found in the c
 CURED_FindREs_summary.txt | Summary report detailing the k-mer, case genome used, number of control genomes used in the search and the number of control genomes excluded due to no alignment found, or low coverage.
 CURED_UniqueEnzymes_PCR_Products.tsv | If a restriction enzyme is identified as unique to the case, the PCR product for the corresponding k-mer is outputted.
 *.log | Log report
+
+If using CURED for published research, please cite:<br>
+Theiller E, Rajagopol S, Higgins S, Torres DI, Napper T, Galis BE, Dash A, Qian E, Hamlette L, She Q, Tanes C, L'Etoile N, Feder A, Viana AS, Côrtes Esteves MA, Abt MC, Coffin SE, Hayes E, Potter RF, Zackular JP, Srinivasan L, Figueiredo AMS, Planet PJ, Moustafa AM.0.Empowering global disease surveillance with CURED: a tool for rapid identification of unique genomic biomarkers. mSystems0:e01063-25.https://doi.org/10.1128/msystems.01063-25
+
+Please note that we have made significant runtime improvements to the tool (especially CURED_FindREs) since its publication. As such, we highly recommend using the most recent version. However, the version as published is still accessible via the v1.0.4 release for those who wish to use it.
