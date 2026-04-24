@@ -12,3 +12,4 @@ dependencies:
     - samtools
     - unitig-caller
     - biopython = 1.82
+    - minimap2
