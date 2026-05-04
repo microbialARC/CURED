@@ -95,7 +95,7 @@ def setup_environment(args):
     kmer_length = args.kmer_length or 20
     EXT = f".{args.extension}" if args.extension else ".fna"
     db = str(args.database or "all")
-    extractedFiles_directory = args.genomes_folder or "genomes/"
+    extractedFiles_directory = args.genomes_folder+"/" if args.genomes_folder and not args.genomes_folder.endswith("/") else "genomes/"
     genus_species = " ".join(args.species) if args.species else None
     genus_species_command = f'"{genus_species}"' if genus_species else None
     kmer_list = args.kmer_list
@@ -130,6 +130,7 @@ def setup_environment(args):
         "genus_species_command": genus_species_command,
         "kmer_list": kmer_list,
         "sequence_type": sequence_type,
+        "tracking_specificity": tracking_specificity,
         "temp_dir": temp_dir,
         "TIMESTR": TIMESTR
     }
@@ -438,6 +439,7 @@ def main(ARGS):
     genus_species_command = env["genus_species_command"]
     kmer_list = env["kmer_list"]
     sequence_type = env["sequence_type"]
+    tracking_specificity = env["tracking_specificity"]
     temp_dir = env["temp_dir"]
     TIMESTR = env["TIMESTR"]
 
