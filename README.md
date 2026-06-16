@@ -283,7 +283,8 @@ optional arguments:
 #### Output from running CURED_FindREs.py
  File | Description
  ---- | -----------
-CURED_UniqueEnzymes.tsv | Report of unique restriction enzyme sites in the k-mers.
+FINAL_SUMMARY.csv | Report detailing total number of restriction enzyme sites, unique restriction enzyme sites, and number of control genomes hit for each kmer found to have unique restriction enzyme sites
+CURED_UniqueEnzymes_minimap2.tsv | Report of unique restriction enzyme sites in the k-mers.
 CURED_FindREs_controls.txt | If a restriction enzyme site that is found in the case genomes is identified in any of the control genomes, the names of the controls are reported with the corresponding k-mer and restriction enzyme.
 CURED_FindREs_summary.txt | Summary report detailing the k-mer, case genome used, number of control genomes used in the search and the number of control genomes excluded due to no alignment found, or low coverage.
 CURED_UniqueEnzymes_PCR_Products.tsv | If a restriction enzyme is identified as unique to the case, the PCR product for the corresponding k-mer is outputted.
